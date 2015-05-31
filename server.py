@@ -17,6 +17,8 @@ while 1:
 	data = client.recv(size)
 	if data:
 		client.send(data)
+		decoded = bytes.decode(data)
+		print(decoded)
 	client.close()
 
 """
