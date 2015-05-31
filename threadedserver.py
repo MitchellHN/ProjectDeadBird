@@ -19,10 +19,12 @@ class Send_Receive_Thread (threading.Thread):
 		
 	def run(self):
 		recvData = ''
+		print 'starting server'
 		#Accept data from the client until some is actually received, then terminate the 
 		while not self.stop_event.is_set():
 			client, address = self.server_socket.accept()
 			data = client.recv(size)
+			print data, "\n"
 			if data:
 				client.send(data)
 				self.stop_event.set()
@@ -78,7 +80,8 @@ class Python_Thread (threading.Thread):
 		while not self.stop_event.is_set():
 			print pyquotes[randint(0, len(pyquotes) - 1)]
 			print "\n"
-			time.sleep(1)
+			print self.stop_event.is_set()
+			time.sleep(10)
     	
     	
 def set_up_socket():
@@ -95,8 +98,9 @@ py_thread = Python_Thread(1, 'thread 1', stop_event)
 size = 1024
 server_thread = Send_Receive_Thread(2, 'thread 2', server_socket, size, stop_event)
 
-py_thread.run()
-server_thread.run()
+py_thread.start()
+server_thread.start()
+
 
 """
 def main():
