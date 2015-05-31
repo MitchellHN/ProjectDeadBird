@@ -8,6 +8,7 @@ import time
 
 print ("Starting threaded Pi Server")
 
+#This thread listens for a client and stops when data is received from it.
 class Send_Receive_Thread (threading.Thread):
 	def __init__(self, threadID, name, server_socket, size, stop_event):
 		threading.Thread.__init__(self)
@@ -18,6 +19,7 @@ class Send_Receive_Thread (threading.Thread):
 		
 	def run(self):
 		recvData = ''
+		#Accept data from the client until some is actually received, then terminate the 
 		while not self.stop_event.is_set():
 			client, address = self.server_socket.accept()
 			data = client.recv(size)
@@ -26,6 +28,7 @@ class Send_Receive_Thread (threading.Thread):
 				self.stop_event.set()
 				client.close()
 		
+#This class quotes Monty Python at you at a rate of 1 quote/second until stop_event is_set(). It will not stop on its own.
 class Python_Thread (threading.Thread):
 	def __init__(self, threadID, name, stop_event):
 		threading.Thread.__init__(self)
@@ -93,6 +96,7 @@ size = 1024
 server_thread = Send_Receive_Thread(2, 'thread 2', server_socket, size, stop_event)
 
 py_thread.run()
+server_thread.run()
 
 """
 def main():
