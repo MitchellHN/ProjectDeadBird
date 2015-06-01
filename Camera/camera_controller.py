@@ -10,20 +10,11 @@ class Camera_Controller():
     
     def __init__(self, stream):
         self.camera = picamera.Picamera()
-        self.camera.resolution = (640, 480)
+        self.camera.resolution = [640, 480]
         self.camera.framerate = 24
-        self.target_luminance = 128
+        self.field_of_view = [53.5, 41.41]
         self.connection = stream.accept()[0].makefile('wb')
         self.crosshair_calibration = [320, 230]
-    
-    #Used with "with...as" statements to create the camera controller
-    def __enter__(self):
-        return self
-    
-    #Used with "with...as" statements to automatically clean up the camera controller
-    def __exit__(self, type, value, traceback):
-        self.camera.close()
-        self.connection.close
         
     def begin_transmission(self):
         self.camera.start_recording(self.connection, format='h264')
@@ -38,4 +29,16 @@ class Camera_Controller():
             image = stream.array
         return image
     
+#Used in with...as statements to create and automatically destroy the
+#camera controller
+class Camera_Constructor():
     
+    def __init__(self, stream):
+        self.controller = Camera_Controller(stream)
+    
+    def __enter__(self):
+        return self.controller
+    
+    def __exit__(self, type, value, traceback):
+        self.controller.camera.close()
+        self.controller.connection.close()

@@ -3,42 +3,94 @@
 
 from RPIO import PWM
 
-#Default update cycle length (mS)
-UPDATE = 20
-
-#Default ulse length [min, max] (ms)
-PULSE = [1.0, 2.0]
-
-#Default servo range (degrees)
-RANGE = 90
-
-class Motor_Controller():
+class Motion_Controller():
     
-    def __init__(self, servos, pins, updates = '', pulses = '', ranges = ''):
+    #Creation method.
+    #   camera_controller:
+    #       Camera control module used for move_to_pixel(). Camera_Controller.
+    def __init__(self, camera_controller):
         self.servos = {}
-        for servo_name in servos:
-            #Pin number
-            pin = pins[servo_name]
-            #update cycle length (ms)
-            update = UPDATE if updates == '' else updates[servo_name]
-            #Pulse length range [min, max] (ms)
-            pulse = PULSE if pulses == '' else pulses[servo_name]
-            #Range of motion (degrees)
-            range_of_motion = RANGE if ranges == '' else ranges[servo_name]
-            #Create servo
-            servo = PWM.servo(0, update)
-            self.servos[servo_name] = {'servo': servo, 'pin': pin, 'update': update, 'pulse': pulse, 'range': range_of_motion, 'position': range_of_motion / 2}
+        self.solenoids = {}
+        self.camera_controller = camera_controller
+            
+    #Add a servo to controller.
+    #   name:
+    #       Name of the servo. Arbitrary type, but typically a string.
+    #   pin:
+    #       GPIO pin connected to servo. Integer.
+    #   range_of_motion (default 90):
+    #       Servo's range of motion in degrees. Numeric.
+    #   pulse (default [1.0, 2.0]):
+    #       Maximum and minimum pulse length in mS. List of form [min, max].
+    #   reverse (default False):
+    #       Whether to reverse move commands before executing. Boolean.
+    #   update (default:
+    #       The update cycle length in mS. Integer.
+    def add_servo(self, name, pin, range_of_motion = 90, pulse = [1.0, 2.0], reverse = False, update = 20):
+        servo = PWM.servo(0, update)
+        self.servos[name] = {'servo': servo, 
+                             'pin': pin, 
+                             'update': update, 
+                             'pulse': [float(pulse[0]), float(pulse[1])], 
+                             'range': range_of_motion, 
+                             'reverse': reverse,
+                             'position': range_of_motion / 2.0
+                             }
         
+    #Sets all servos
     def update(self):
         for servo in self.servos:
-            pulse = (servo['position'] / servo['range']) * (max(servo['pulse']) -  min(servo['pulse'])) + min(servo['pulse'])
-            servo['servo'].set_servo(servo['pin'], pulse)
+            #Correct position if out of bound
+            self.servos[servo]['position'] %= 360
+            if self.servos[servo]['position'] > self.servos[servo]['range']:
+                self.servos[servo]['position'] = self.servos[servo]['range']
+            #Calculate pulse
+            pulse_min = min(self.servos[servo]['pulse'])
+            pulse_max = max(self.servos[servo]['pulse'])
+            position = self.servos[servo]['position']
+            range_of_motion = self.servos[servo]['range']
+            position_ratio = position / range_of_motion
+            pulse =  position_ratio * (pulse_max - pulse_min) + pulse_min
+            #Set servo
+            pin = self.servos[servo]['pin']
+            self.servos[servo]['servo'].set_servo(pin, pulse)
             
-        
-    def move(self, servo_name, position):
-        self.servos[servo_name]['position'] = position
+    #Move a servo
+    #   servo_name:
+    #       The name assigned to the servo at creation.
+    #   change:
+    #       The degree change.
+    def move(self, servo_name, change):
+        #Multiply change
+        change *= -1 if self.servos[servo_name]['reverse'] else 1
+        self.servos[servo_name]['position'] += change
         self.update()
     
-    def move_to(self, servo_angles):
+    #Move an arbitrary number of servos to a particular conficuration. 
+    #   servo_angles:
+    #       The servos to move and the angles to move to. Dictionary of the 
+    #       form {servo_name: angle}, where servo_name is the name assigned to 
+    #       the servo and angle is the angle in degrees. Only servos to be 
+    #       changed need be listed.
+    def move_to_angle(self, servo_angles):
         for servo_name in servo_angles:
-            self.move(self.servos[servo_name], servo_angles[servo_name])
+            position = self.servos[servo_name]['position']
+            change = servo_angles[servo_name] - position
+            self.move(servo_name, change)
+    
+    #Move to a pixel on the camera.
+    #   pixel_target:
+    #       The pixel to move to. List of the form [x, y] with 0,0 in top right.
+    #   altitude_Servo:
+    #       The name assigned to the servo controlling altitude (y on camera).
+    #   azimuth_servo:
+    #       The name assigned to the servo controllng azimuth (x on camera).
+    def move_to_pixel(self, pixel_target, altitude_servo = 'altitude', azimuth_servo = 'azimuth'):
+        resolution = self.camera_controller.resolution
+        field_of_view = self.camera_controller.field_of_view
+        degrees_per_pixel = [degree / pixel for pixel, degree in zip(resolution, field_of_view)]
+        crosshair_calibration = self.camera_controller.crosshair_calibration
+        pixel_change = [calibration - pixel for calibration, pixel in zip(crosshair_calibration, pixel_target)]
+        degree_change = [convert * pixel for convert, pixel in zip(degrees_per_pixel, pixel_change)]
+        self.move(azimuth_servo, degree_change[0])
+        self.move(altitude_servo, degree_change[1])
