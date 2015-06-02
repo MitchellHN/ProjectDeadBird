@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from RPIO import PWM
+import camera_controller
 
 class Motion_Controller():
     
