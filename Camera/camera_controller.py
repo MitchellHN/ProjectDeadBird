@@ -8,12 +8,15 @@ import cv2
 
 class Camera_Controller():
     
-    def __init__(self, stream):
+    #Creation method
+    #   stream:
+    #       The socket to which the camera should transmit. Socket.
+    def __init__(self, server_socket):
         self.camera = picamera.Picamera()
         self.camera.resolution = [640, 480]
         self.camera.framerate = 24
         self.field_of_view = [53.5, 41.41]
-        self.connection = stream.accept()[0].makefile('wb')
+        self.connection = server_socket.accept()[0].makefile('wb')
         self.crosshair_calibration = [320, 230]
         
     def begin_transmission(self):
@@ -33,6 +36,9 @@ class Camera_Controller():
 #camera controller
 class Camera_Constructor():
     
+    #Creation method
+    #   stream:
+    #       The socket to which the camera should transmit. Socket.
     def __init__(self, stream):
         self.controller = Camera_Controller(stream)
     

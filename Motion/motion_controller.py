@@ -26,7 +26,8 @@ class Motion_Controller():
     #       Whether to reverse move commands before executing. Boolean.
     #   update (default:
     #       The update cycle length in mS. Integer.
-    def add_servo(self, name, pin, range_of_motion = 90, pulse = [1.0, 2.0], reverse = False, update = 20):
+    def add_servo(self, name, pin, range_of_motion = 90, pulse = [1.0, 2.0], 
+                  reverse = False, update = 20):
         servo = PWM.servo(0, update)
         self.servos[name] = {'servo': servo, 
                              'pin': pin, 
@@ -85,12 +86,17 @@ class Motion_Controller():
     #       The name assigned to the servo controlling altitude (y on camera).
     #   azimuth_servo:
     #       The name assigned to the servo controllng azimuth (x on camera).
-    def move_to_pixel(self, pixel_target, altitude_servo = 'altitude', azimuth_servo = 'azimuth'):
+    def move_to_pixel(self, pixel_target, altitude_servo = 'altitude',
+                      azimuth_servo = 'azimuth'):
         resolution = self.camera_controller.resolution
         field_of_view = self.camera_controller.field_of_view
-        degrees_per_pixel = [degree / pixel for pixel, degree in zip(resolution, field_of_view)]
         crosshair_calibration = self.camera_controller.crosshair_calibration
-        pixel_change = [calibration - pixel for calibration, pixel in zip(crosshair_calibration, pixel_target)]
-        degree_change = [convert * pixel for convert, pixel in zip(degrees_per_pixel, pixel_change)]
+        #Calculate altitude and azimuth change
+        degrees_per_pixel = [degree / pixel for pixel, degree in 
+                             zip(resolution, field_of_view)]
+        pixel_change = [calibration - pixel for calibration, pixel in
+                        zip(crosshair_calibration, pixel_target)]
+        degree_change = [convert * pixel for convert, pixel in 
+                         zip(degrees_per_pixel, pixel_change)]
         self.move(azimuth_servo, degree_change[0])
         self.move(altitude_servo, degree_change[1])
