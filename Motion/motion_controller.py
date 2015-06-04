@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from RPIO import PWM
+import RPIO
 import camera_controller
 
 class Motion_Controller():
@@ -10,9 +10,13 @@ class Motion_Controller():
     #   camera_controller:
     #       Camera control module used for move_to_pixel(). Camera_Controller.
     def __init__(self, camera_controller):
+        RPIO.set_mode(RPIO.BCM)
+        self.servo_channels = []
+        self.channel_cycles = []
         self.servos = {}
-        self.solenoids = {}
+        self.actuators = {}
         self.camera_controller = camera_controller
+        self.used_pins = []
             
     #Add a servo to controller.
     #   name:
@@ -26,10 +30,19 @@ class Motion_Controller():
     #   reverse (default False):
     #       Whether to reverse move commands before executing. Boolean.
     #   update (default:
-    #       The update cycle length in mS. Integer.
+    #       The update cycle length in uS. Integer.
     def add_servo(self, name, pin, range_of_motion = 90, pulse = [1.0, 2.0], 
-                  reverse = False, update = 20):
-        servo = PWM.servo(0, update)
+                  reverse = False, update = 20000):
+        assert pin not in self.used_pins
+        #Create RPIO servo object if none exist with the correct update cycle,
+        #otherwise use existing object with correct update cycle
+        if update in self.channel_cycles:
+            servo = self.channel_cycles.index(update)
+        else:
+            assert len(self.channel_cycles) <= 15
+            servo = len(self.channel_cycles)
+            self.servo_channels.append(RPIO.PWM.servo(servo, update))
+            self.channel_cycles.append(update)
         self.servos[name] = {'servo': servo, 
                              'pin': pin, 
                              'update': update, 
@@ -38,8 +51,24 @@ class Motion_Controller():
                              'reverse': reverse,
                              'position': range_of_motion / 2.0
                              }
+        self.used_pins.append(pin)
+    
+    #Add a linear actuator to controller                         
+    def add_actuator(self, name, pin, kind = 'pull'):
+        assert pin not in self.used_pins
+        assert kind in ['push',
+                        'pull']
+        if kind == 'push':
+            position = 'in'
+        elif kind == 'pull':
+            position = 'out'
+        RPIO.setup(pin, RPIO.out)
+        self.actuators[name] = {'pin': pin,
+                                'kind': kind,
+                                'position': position
+                                }
         
-    #Sets all servos
+    #Sets all servos and actuators
     def update(self):
         for servo in self.servos:
             #Correct position if out of bound
@@ -55,7 +84,14 @@ class Motion_Controller():
             pulse =  position_ratio * (pulse_max - pulse_min) + pulse_min
             #Set servo
             pin = self.servos[servo]['pin']
-            self.servos[servo]['servo'].set_servo(pin, pulse)
+            self.servo_channels[self.servos[servo]['servo']].set_servo(pin, pulse)
+        for actuator in self.actuators:
+            position = 1 if self.actuators[actuator]['position'] == 'in' else 0
+            pin = self.actuators[actuator]['pin']
+            if self.actuators[actuator]['kind'] == 'push':
+                RPIO.output(pin, abs(position - 1))
+            else:
+                RPIO.output(pin, position)
             
     #Move a servo
     #   servo_name:
@@ -63,7 +99,7 @@ class Motion_Controller():
     #   change:
     #       The degree change.
     def move(self, servo_name, change):
-        #Multiply change
+        #Invert change if the servo has been set to be reversed.
         change *= -1 if self.servos[servo_name]['reverse'] else 1
         self.servos[servo_name]['position'] += change
         self.update()
