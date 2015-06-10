@@ -3,6 +3,7 @@
 
 import picamera
 import socket
+import ssl
 import picamera.array
 import cv2
 
