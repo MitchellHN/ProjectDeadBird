@@ -1,0 +1,56 @@
+Each command consists of four bytes (e.g. 01A58E74). The first byte contains 
+the function; the last three contain arguments.
+
+To Raspberry Pi:
+=====================
+Byte code   Function
+---------------------
+00          Error. Argument is ID of error.
+
+XX          Move to pixel. Argument is the pixel number, counting left and then
+            down from 0 in the top left corner.
+            
+XX          Move to altitude. Argument is altitude in 1/100 degrees.
+            
+XX          Move to azimuth. Argument is azimuth in 1/100 degrees.
+            
+XX          Move to saved location. Argument is ID of saved location.
+
+XX          Set safety. First bit of argument determines on (1) or off (0);
+            further bits are irrelevant.
+            
+XX          Fire. Argument is irrelevant.
+            
+XX          Move reticle. Argument is the pixel number, counting left and then
+            down from 0 in the top left corner.
+            
+XX          Store new saved location. Argument is irrelevant.
+            
+XX          Request reticle position. Argument is irrelevant.
+            
+XX          Request altitude/azimuth. Argument is irrelevant.
+
+XX          Request safety position. Argument is irrelevant.
+
+XX          Request list of saved locations. Argument is irrelevant.
+
+
+To iOS:
+=====================
+Byte code   Function
+---------------------
+00          Error. Argument is ID of error.
+
+XX          Return reticle position. Argument is the pixel number, counting 
+            left and then down from 0 in the top left corner.
+            
+XX          Return altitude. Argument is altitude in 1/100 degrees.
+            
+XX          Return azimuth. Argument is azimuth in 1/100 degrees.
+            
+XX          Return safety position. First bit indicates on (1) or off (0); 
+            further bits are irrelevant.
+            
+XX          Begin list of saved locations. Argument is number of saved          # Going to need special protocol for this.
+            locations.
+            
