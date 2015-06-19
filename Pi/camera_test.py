@@ -1,4 +1,4 @@
-import Hardware.camera_controller as camera_controller
+from Hardware import camera_controller
 import socket
 import time
 
