@@ -5,7 +5,7 @@ import picamera
 import socket
 import ssl
 import picamera.array
-import cv2
+#import cv2
 
 class Camera_Controller():
     
@@ -25,14 +25,14 @@ class Camera_Controller():
         
     def end_transmission(self):
         self.camera.stop_recording()
-        
+'''        
     def get_opencv(self):
         with picamera.array.PiRGBArray(self.camera) as stream:
             self.camera.capture(stream, format='bgr', use_video_port=True)
             # At this point the image is available as stream.array
             image = stream.array
         return image
-    
+'''    
 #Used in with...as statements to create and automatically destroy the
 #camera controller
 class Camera_Constructor():
