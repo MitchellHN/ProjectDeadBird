@@ -13,7 +13,7 @@ class Camera_Controller():
     #   stream:
     #       The socket to which the camera should transmit. Socket.
     def __init__(self, server_socket):
-        self.camera = picamera.Picamera()
+        self.camera = picamera.PiCamera()
         self.camera.resolution = [640, 480]
         self.camera.framerate = 24
         self.field_of_view = [53.5, 41.41]
