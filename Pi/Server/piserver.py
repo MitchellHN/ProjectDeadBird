@@ -70,7 +70,22 @@ class Server_Process (threading.Thread):
 		self.receive_queue = queue.Queue()
 		self.send_thread = Send_Thread(socket, self.send_queue)
 		self.receive_thread = Receive_Thread(socket, self.receive_queue)
-		self.commands = {}
+		self.commands = {''''0x00': self.receive_error,
+						 '0x10': self.move_to_pixel,
+						 '0x11': self.move_to_altitude,
+						 '0x12': self.change_altitude,
+						 '0x13': self.move_to_azimuth,
+						 '0x14': self.change_azimuth,
+						 '0x15': self.move_to_location,
+						 '0x16': self.set_safety,
+						 '0x17': self.fire,
+						 '0x30': self.move_reticle,
+						 '0x31': self.store_location,
+						 '0x50': self.get_reticle,
+						 '0x51': self.get_altitude,
+						 '0x52': self.get_azimuth,
+						 '0x53': self.get_safety,
+						 '0x54': self.get_locations'''}
 		
 	def run(self):
 		self.send_thread.start()
@@ -169,7 +184,7 @@ class Receive_Thread (threading.Thread):
 		while True:
 			data = self.socket.recv(4)
 			if data:
-				command = data[0]
+				command = hex(data[0])
 				argument = bytes([data[1], data[2], data[3]])
 				self.master_queue.put([command, argument])
 				

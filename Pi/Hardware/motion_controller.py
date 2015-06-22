@@ -9,8 +9,9 @@ class Motion_Controller():
     #Creation method.
     #   camera_controller:
     #       Camera control module used for move_to_pixel(). Camera_Controller.
-    def __init__(self, camera_controller):
+    def __init__(self, camera_controller, config):
         RPIO.set_mode(RPIO.BCM)
+        self.config = config
         self.servo_channels = []
         self.channel_cycles = []
         self.servos = {}

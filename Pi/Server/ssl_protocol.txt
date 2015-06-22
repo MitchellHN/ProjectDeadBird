@@ -1,5 +1,5 @@
 Each command consists of four bytes (e.g. 01A58E74). The first byte contains 
-the function; the last three contain arguments.
+the function; the last three contain arguments. All arguments
 
 To Raspberry Pi:
 =====================
@@ -7,32 +7,46 @@ Byte code   Function
 ---------------------
 00          Error. Argument is ID of error.
 
-XX          Move to pixel. Argument is the pixel number, counting left and then
-            down from 0 in the top left corner.
-            
-XX          Move to altitude. Argument is altitude in 1/100 degrees.
-            
-XX          Move to azimuth. Argument is azimuth in 1/100 degrees.
-            
-XX          Move to saved location. Argument is ID of saved location.
+--Movement
 
-XX          Set safety. First bit of argument determines on (1) or off (0);
+10          Move to pixel. Argument is the pixel number, counting left and then
+            down from 0 in the top left corner. Unsigned
+            
+11          Move to altitude. Argument is altitude in 1/100 degrees. Unsigned
+
+12          Change altitude. Argument is change in 1/100 degrees, signed with
+            two's complement.
+
+13          Move to azimuth. Argument is azimuth in 1/100 degrees. Unsigned
+            
+14          Change azimuth. Argument is change in 1/100 degrees, signed with
+            two's complement.
+            
+15          Move to saved location. Argument is ID of saved location.
+
+16          Set safety. First bit of argument determines on (1) or off (0);
             further bits are irrelevant.
             
-XX          Fire. Argument is irrelevant.
-            
-XX          Move reticle. Argument is the pixel number, counting left and then
-            down from 0 in the top left corner.
-            
-XX          Store new saved location. Argument is irrelevant.
-            
-XX          Request reticle position. Argument is irrelevant.
-            
-XX          Request altitude/azimuth. Argument is irrelevant.
+17          Fire. Argument is irrelevant.
 
-XX          Request safety position. Argument is irrelevant.
+--Alter internal variables
+            
+30          Move reticle. Argument is the pixel number, counting left and then
+            down from 0 in the top left corner. Unsigned.
+            
+31          Store new saved location. Argument is irrelevant.
 
-XX          Request list of saved locations. Argument is irrelevant.
+--Request data
+            
+50          Request reticle position. Argument is irrelevant.
+            
+51          Request altitude. Argument is irrelevant.
+
+52          Request azimuth. Arguement is irrelevant.
+
+53          Request safety position. Argument is irrelevant.
+
+54          Request list of saved locations. Argument is irrelevant.
 
 
 To iOS:
@@ -41,16 +55,18 @@ Byte code   Function
 ---------------------
 00          Error. Argument is ID of error.
 
-XX          Return reticle position. Argument is the pixel number, counting 
-            left and then down from 0 in the top left corner.
+--Data return
+
+10          Return reticle position. Argument is the pixel number, counting 
+            left and then down from 0 in the top left corner. Unsigned
             
-XX          Return altitude. Argument is altitude in 1/100 degrees.
+11          Return altitude. Argument is altitude in 1/100 degrees. Unsigned
             
-XX          Return azimuth. Argument is azimuth in 1/100 degrees.
+12          Return azimuth. Argument is azimuth in 1/100 degrees. Unsigned.
             
-XX          Return safety position. First bit indicates on (1) or off (0); 
+13          Return safety position. First bit indicates on (1) or off (0); 
             further bits are irrelevant.
             
-XX          Begin list of saved locations. Argument is number of saved          # Going to need special protocol for this.
-            locations.
+14          Begin list of saved locations. Argument is number of saved          # Going to need special protocol for this.
+            locations. Unsigned.
             
