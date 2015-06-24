@@ -6,8 +6,8 @@ import ssl
 import config
 try:
     import picamera
-except ImportError:
-    print("Couldn't import RPIO")
+except (ImportError, SystemError):
+    print("Couldn't import picamera")
 try:
     import cv2
 except ImportError:

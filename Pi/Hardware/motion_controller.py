@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import camera_controller
+import Hardware.camera_controller as camera_controller
 import config
 import time
 import threading
 try:
     import RPIO
-except ImportError:
+except (ImportError, SystemError):
     print("Couldn't import RPIO")
 
 
