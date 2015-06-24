@@ -1,9 +1,22 @@
+Connecting:
+=====================
+
+Connection has two parts. First, the Raspberry Pi listens on the data socket
+and the UI connects. Then, the UI listens on a camera port and sends a port 
+number while the Raspberry Pi connects. At this point, the Raspberry Pi will
+begin transmitting video and either side can send commands.
+
+
+Commands:
+=====================
+
 Each command consists of four bytes (e.g. 01A58E74). The first byte contains 
-the function; the last three contain arguments. All arguments
+the function; the last three contain arguments. All arguments have big
+endianness, i.e. the first bit is the most significant.
 
 To Raspberry Pi:
 =====================
-Byte code   Function
+Hex code    Function
 ---------------------
 00          Error. Argument is ID of error.
 
@@ -17,10 +30,11 @@ Byte code   Function
 12          Change altitude. Argument is change in 1/100 degrees, signed with
             two's complement.
 
-13          Move to azimuth. Argument is azimuth in 1/100 degrees. Unsigned
+13          Move to azimuth. Argument is azimuth from most counter-clockwise
+            direction in 1/100 degrees. Unsigned
             
 14          Change azimuth. Argument is change in 1/100 degrees, signed with
-            two's complement.
+            two's complement. Positive is clockwise, negative is counter.
             
 15          Move to saved location. Argument is ID of saved location.
 
@@ -49,7 +63,7 @@ Byte code   Function
 54          Request list of saved locations. Argument is irrelevant.
 
 
-To iOS:
+To UI:
 =====================
 Byte code   Function
 ---------------------
