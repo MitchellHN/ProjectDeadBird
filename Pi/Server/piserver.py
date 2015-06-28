@@ -32,8 +32,8 @@ class Camera_Process (threading.Thread):
 	    self.control_queue = control_queue
 	    self.commands = {'start': self.start_camera,
 	    				 'stop': self.stop_camera,
-	    				 'get callibration': self.get_calibration,
-	    				 'calibrate': self.calibrate}
+	    				 'get reticle': self.get_calibration,
+	    				 'move reticle': self.calibrate}
 	    				 
 	#Main process. Do not call; use start() instead.
 	def run(self):
@@ -71,7 +71,8 @@ class Camera_Process (threading.Thread):
 	
 	#Get and return calibration
 	def get_calibration(self):
-		command = ['calibration ==', self.camera_controller.crosshair_calibration]
+		command = ['reticle ==']
+		command += self.camera_controller.crosshair_calibration
 		self.control_queue.put(command)
 		
 	#Change calibration
@@ -80,9 +81,8 @@ class Camera_Process (threading.Thread):
 		
 					
 				
-#Used to send commands to and receive commands from the UI. Converts to and
-#from bytes and [command, argument] pairs. Creates child threads Send_Thread
-#and Receive_Thread, and terminates them as necessary.
+#Used to send commands to and receive commands from the UI.Creates child threads 
+#Send_Thread and Receive_Thread, and terminates them as necessary. 
 class Server_Process (threading.Thread):
 
     #Creation method
@@ -105,7 +105,7 @@ class Server_Process (threading.Thread):
 											 control_queue, 
 											 self.child_stop_flag)
 
-		
+	#Main process. Do not call; use start() instead.	
 	def run(self):
 		threads = []
 		self.send_thread.start()
@@ -145,7 +145,8 @@ class Send_Thread (threading.Thread):
 						 'send azimuth': self.send_azimuth,
 						 'send safety': self.send_safety,
 						 'send locations': self.send_locations}
-		
+	
+	#Main process. Do not call; use start() instead.	
 	def run(self):
 		while True:
 			if self.stop_flag.is_set():
@@ -167,7 +168,7 @@ class Send_Thread (threading.Thread):
 				try:
 					self.commands[command](*arguments)
 				except KeyError:
-					print("%r is not an acceptable camera command" % command)
+					print("%r is not an acceptable send command" % command)
 				except TypeError:
 					message = ("The %r command was given the arguments %r" % 
 							   (command, arguments))
@@ -224,7 +225,8 @@ class Receive_Thread (threading.Thread):
 						 '0x54': self.get_locations}
 		self.errors = {
 				  }
-		
+	
+	#Main process. Do not call; use start() instead.	
 	def run(self):
 		while True:
 			if self.stop_flag.is_set():
@@ -234,8 +236,8 @@ class Receive_Thread (threading.Thread):
 				command = hex(data[0])
 				argument = bytes([data[1], data[2], data[3]])
 				if config.echo:
-					print 'Received command %s with argument %s' % (command,
-																   argument)
+					print('Received command %s with argument %s' % (command,
+																    argument))
 		#Try to execute command, raise errors if necessary
 		try:
 			self.commands[command](*argument)
@@ -257,7 +259,7 @@ class Receive_Thread (threading.Thread):
 		pixel_number = int.from_bytes(pixel, byteorder='big')
 		if config.echo:
 			print('Received command to move to pixel %s.' % pixel_number)
-		self.control_queue.push(['move_to_pixel', pixel_number])
+		self.control_queue.push(['move to pixel', pixel_number])
 		
 	def move_to_altitude(self, altitude):
 		altitude = int.from_bytes(altitude, byteorder = 'big')
@@ -339,10 +341,10 @@ class Receive_Thread (threading.Thread):
 	def get_safety(self, irrelevant):
 		if config.echo:
 			print('Received command to get reticle position.')
-		self.control_queue.push('send azimuth')
+		self.control_queue.push('send safety')
 		
 	def get_locations(self, irrelevant):
 		if config.echo:
 			print('Received command to get reticle position.')
-		self.control_queue.push('send azimuth')	
+		self.control_queue.push('send locations')	
 				

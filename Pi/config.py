@@ -39,27 +39,36 @@ __data_ports =          [8090,                      #list of possible ports
                          8091,
                          8092,
                          8093]
-__cert_file =           'cert.pem'
-__key_file =            'key.pem'
+__cert_file =           'cert.pem'                  #certificate file
+__key_file =            'key.pem'                   #certificate key file
 
 #IO
-__altitude_pin =        1
-__altitude_rangev =     90
-__altitude_pulse =      [1.0,
+__altitude_pin =        1                           #pin to altitude servo
+__altitude_range =      90                          #alt motion range (degrees)
+__altitude_pulse =      [1.0,                       #alt pulse range (mS)
                          2.0]
-__altitude_reverse =    False
-__azimuth_pin =         2
-__azimuth_rangev =      90
-__azimuth_pulse =       [1.0,
+__altitude_reverse =    False                       #if up = 0 degrees
+__azimuth_pin =         2                           #pin to azimuth servo
+__azimuth_range =       90                          #az motion range (degrees)
+__azimuth_pulse =       [1.0,                       #az pulse range (mS)
                          2.0]
-__azimuth_reverse =     False
-__trigger_pin =         3
-__trigger_type =        'pull'
-__safety_pin =          4
-__safety_type =         'pull'
-__safety_on_position =  'out'
+__azimuth_reverse =     False                       #if +degrees = ccwise
+__trigger_pin =         3                           #pin to trigger actuator
+__trigger_type =        'pull'                      #type of trigger actuator
+__safety_pin =          4                           #pin to safety actuator
+__safety_type =         'pull'                      #type of safety actuator
+__safety_on_position =  'out'                       #'in' or 'out'
+__fire_position =       'in'
+__fire_duration =       0.5                         #duration of trigger pull
 
-##################Do Not Edit Past This Line##################
+#Camera
+__calibration =         [320, 230]                  #where on screen bbs hit
+__fov =                 [53.5, 41.41]               #degrees [x, y]
+
+#Unaltered by program
+used_pins =             []                          #E.g. by other processes
+
+################## Do Not Edit Past This Line ##################
 
 self_path = os.path.realpath(__file__)
 path = self_path[:-9]

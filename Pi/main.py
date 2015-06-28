@@ -27,7 +27,6 @@ import queue
 import multiprocessing
 import threading
 import getopt
-import getopt
 import config
 import sys
 
@@ -183,6 +182,13 @@ def handle_options():
             config.used_pins = []
             
 def main():
+    handle_options()
+    #Force disable camera if picamera isn't imported and motion if RPIO 
+    #isn't imported.
+    if not 'RPIO' in sys.modules:
+        config.motion_on = False
+    if not 'picamera' in sys.modules:
+        config.camera_on = False
     #Connect to a UI and accept its commands
     connect_and_run()
     #Rewrite config
