@@ -1,0 +1,5 @@
+Dummy functions:
+    control.Control_Process.error
+    control.Control_Process.move_To_location
+    control.Control_Process.store_location
+    
