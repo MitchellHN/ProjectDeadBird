@@ -13,6 +13,17 @@ try:
 except ImportError:
     print("Couldn't import cv2")
 
+#============================================================================
+# Config
+# ----
+#   This file contains a class (Camera_Controller) for high-level control
+#   of the Raspberry Pi camera module and piping its output to a socket.
+#   It also contains a dummy class (Dummy_Camera_Controller) for simulating
+#   control when the camera module isn't connected, the UI does not use
+#   video, or for testing on a different system, a dummy class (Dummy_Camera)
+#   that simulates picamera.PiCamera for the dummy controller class, and
+#   a context manager class (Camera_Constructor) for the two controllers.
+
 #USed to control a Raspberry Pi camera module.
 class Camera_Controller():
     
@@ -23,9 +34,9 @@ class Camera_Controller():
         self.camera = picamera.PiCamera()
         self.camera.resolution = [640, 480]
         self.camera.framerate = 24
-        self.field_of_view = [53.5, 41.41]
+        self.field_of_view = config.__fov
         self.connection = server_socket.makefile('wb')
-        self.crosshair_calibration = [320, 230]
+        self.crosshair_calibration = config.__calibration
         
     def begin_transmission(self):
         if config.echo:
@@ -45,7 +56,7 @@ class Camera_Controller():
         return image
     
 
-
+#Used to simulate control over camera
 class Dummy_Camera_Controller():
     #Creation method
     def __init__(self):
@@ -62,19 +73,18 @@ class Dummy_Camera_Controller():
     def end_transmission(self):
         if config.echo:
             print('Ending camera transmission')
+        
+    def get_opencv(self):
+        return None
             
+#Used by Dummy_Camera_Controller as a substitute for picamera.PiCamera.
 class Dummy_Camera():
-    
     def __init__(self):
         resolution = None
         framerate = None
         
     def close(self):
         resolution = None
-        
-        
-    def get_opencv(self):
-        return None
 
 
 #Used in with...as statements to create and automatically destroy the
@@ -83,8 +93,9 @@ class Camera_Constructor():
     
     #Creation method
     #   stream:
-    #       The socket to which the camera should transmit. Socket.
-    def __init__(self, stream, client, port):
+    #       The socket to which the camera should transmit. SSLSocket for 
+    #       camera controller or any other type for its dummyl
+    def __init__(self, stream):
         if isinstance(stream, ssl.SSLSocket):
             self.controller = Camera_Controller(stream)
         else:

@@ -9,6 +9,14 @@ try:
     import RPIO
 except (ImportError, SystemError):
     print("Couldn't import RPIO")
+    
+#============================================================================
+# Config
+# ----
+#   This file contains a class (Motion_Controller) for high-level control
+#   of servos and linear actuators on the Raspberry Pi as well as a class 
+#   (Dummy_Motion_Controller) for simulating control if no servos/actuators 
+#   are actually connected or if testing an a different system.
 
 
 #Used to control servos and linear actuators. 
@@ -65,7 +73,14 @@ class Motion_Controller():
         #Claim pin
         config.used_pins.append(pin)
     
-    #Add a linear actuator to controller                         
+    #Add a linear actuator to controller
+    #   name:
+    #       Name of the actuator. Arbitrary type, but typically a string.
+    #   pin:
+    #       GPIO pin connected to actuator. Integer.
+    #   kind (default 'pull'):
+    #       Type of actuator. 'push' if powering pushes piston out, 'pull' if
+    #       powering actuator pulls piston in. 
     def add_actuator(self, name, pin, kind = 'pull'):
         #Make sure the pin isn't already used for something else
         assert pin not in config.used_pins
