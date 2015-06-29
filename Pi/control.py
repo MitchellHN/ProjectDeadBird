@@ -32,7 +32,7 @@ class Control_Process (multiprocessing.Process):
 		
 	def run(self):
 		while True:
-		    if not self.read_queue.empty():
+			if not self.read_queue.empty():
 				#Get command from queue
 				q = self.read_queue.get()
 				#Extract command and arguments (if any)

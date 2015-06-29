@@ -3,8 +3,10 @@ Connecting:
 
 Connection has two parts. First, the Raspberry Pi listens on the data socket
 and the UI connects. Then, the UI listens on a camera port and sends a port 
-number while the Raspberry Pi connects. At this point, the Raspberry Pi will
-begin transmitting video and either side can send commands.
+number while the Raspberry Pi connects. If the Raspberry Pi cannot use the port,
+it will send the byte '00' and the UI will send another port number. At this 
+point, the Raspberry Pi will begin transmitting video and either side can send 
+commands.
 
 
 Commands:

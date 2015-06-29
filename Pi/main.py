@@ -48,15 +48,16 @@ def connect_and_run():
                 data_socket = ssl.wrap_socket(socket.socket(socket.AF_INET, 
                                                             socket.SOCK_STREAM), 
                                               server_side = True, 
-                                              certfile = config.cert_file, 
-                                              keyfile = config.key_file)
-                data_socket.bind('', config.data_ports[port_number])
+                                              certfile = config.__cert_file, 
+                                              keyfile = config.__key_file)
+                data_socket.bind(('', config.data_ports[port_number]))
                 data_socket.listen(1)
                 data_client, address = data_socket.accept()
             except OSError:
-                if port_number < len(config.__data_ports) - 1:
+                if port_number < len(config.data_ports) - 1:
                     port_number += 1
                 else:
+                    print('ran out of ports')
                     raise
             
         #Wait for Port from UI
@@ -65,6 +66,8 @@ def connect_and_run():
             if port:
                 if port not in tried_ports:
                     break
+                else:
+                    data_client.send(bytes(1))
         #Connect to UI with camera connection
         if config.camera_on:
             if config.echo:
@@ -140,9 +143,18 @@ def connect_and_run():
                     break
             
     except:
-        data_socket.close()
-        data_client.close()
-        camera_socket.close()
+        try:
+            data_socket.close()
+        except UnboundLocalError:
+            pass
+        try:
+            data_client.close()
+        except UnboundLocalError:
+            pass
+        try:
+            camera_socket.close()
+        except UnboundLocalError:
+            pass
         raise
         
 #Handles options, including setting session variables in config
@@ -159,17 +171,23 @@ def handle_options():
     for opt, arg in options:
         #Display help file
         if opt in ['-h', '--help', '-?']:
-            helpfile = open('help.txt', 'w')
-            print (helpfile.read)
+            with open('Pi/help.txt') as helpfile:
+                print(helpfile.read())
             sys.exit()
         #Turn on or off echoing, motion control, and camera control according to
         #options given at command line.
-        config.echo = True if opt in ['-e', '--e'] else False
+        config.echo = True if opt in ['-e', '--echo'] else False
         config.motion_on = False if opt in ['-m', '--no-motion'] else True
+        config.camera_on = False if opt in ['-c', '--no-camera'] else True
+        #Force disable camera if picamera isn't imported and motion if RPIO 
+        #isn't imported.
+        if not 'RPIO' in sys.modules:
+            config.motion_on = False
+        if not 'picamera' in sys.modules:
+            config.camera_on = False
         if config.echo:
             print('Motion {0}'.format(('enabled' if config.motion_on 
                                        else 'disabled')))
-        config.camera_on = False if opt in ['-c', '--no-camera'] else True
         if config.echo:
             print('Camera {0}'.format(('enabled' if config.camera_on 
                                        else 'disabled')))
@@ -183,14 +201,11 @@ def handle_options():
             
 def main():
     handle_options()
-    #Force disable camera if picamera isn't imported and motion if RPIO 
-    #isn't imported.
-    if not 'RPIO' in sys.modules:
-        config.motion_on = False
-    if not 'picamera' in sys.modules:
-        config.camera_on = False
     #Connect to a UI and accept its commands
     connect_and_run()
     #Rewrite config
     if not config.static():
         config.rewrite()
+    
+if __name__ == '__main__':    
+    main()

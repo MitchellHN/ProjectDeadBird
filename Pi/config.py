@@ -35,10 +35,6 @@ import os
 #   first line of a dictionary or list, or both.
 
 #SSL
-__data_ports =          [8090,                      #list of possible ports
-                         8091,
-                         8092,
-                         8093]
 __cert_file =           'cert.pem'                  #certificate file
 __key_file =            'key.pem'                   #certificate key file
 
@@ -67,6 +63,10 @@ __fov =                 [53.5, 41.41]               #degrees [x, y]
 
 #Unaltered by program
 used_pins =             []                          #E.g. by other processes
+data_ports =            [8090,                      #list of possible ports
+                         8091,
+                         8092,
+                         8093]
 
 ################## Do Not Edit Past This Line ##################
 
