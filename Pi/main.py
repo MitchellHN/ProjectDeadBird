@@ -39,35 +39,51 @@ import sys
 def connect_and_run():
     try:
         #Create data connection and wait for connection
-        print('Connecting data')
+        if config.echo:
+            print('Connecting data')
         port_number = 0
         tried_ports = []
         #Create socket at open port, raise OSError if none are available
         while True:
             try:
+                if config.echo:
+                    print('Connecting on port %s' %
+                          config.data_ports[port_number])
                 data_socket = ssl.wrap_socket(socket.socket(socket.AF_INET, 
                                                             socket.SOCK_STREAM), 
                                               server_side = True, 
-                                              certfile = config.__cert_file, 
-                                              keyfile = config.__key_file)
+                                              certfile = config._cert_file,
+                                              keyfile = config._key_file)
                 data_socket.bind(('', config.data_ports[port_number]))
                 data_socket.listen(1)
                 data_client, address = data_socket.accept()
+                if config.echo:
+                    print(address)
+                    print('Connected to %r' % address[0])
             except OSError:
                 if port_number < len(config.data_ports) - 1:
                     port_number += 1
                 else:
                     print('ran out of ports')
                     raise
-            
+            else:
+                break
+        if config.echo:
+            print('Waiting for camera port from UI.')
         #Wait for Port from UI
         while True:
-            port = int.from_bytes(data_client.recv(65536))
-            if port:
+            data = data_client.recv(3)
+            if data:
+                port = int.from_bytes(data, 'big')
+                print(port)
+                if port == 0:
+                    config.camera_on = False
+                    break
                 if port not in tried_ports:
+                    data_client.send(b'\xff')
                     break
                 else:
-                    data_client.send(bytes(1))
+                    data_client.send(b'\x00')
         #Connect to UI with camera connection
         if config.camera_on:
             if config.echo:
@@ -86,24 +102,24 @@ def connect_and_run():
             if config.motion_on:
                 motion = motion_controller.Motion_Controller(camera)
             else:
-                motion = motion_controller.Dummy_Motion_Controller()
+                motion = motion_controller.Dummy_Motion_Controller(camera)
             #Add servos and actuators to motion controller
             motion.add_servo('altitude', 
-                             config.__altitude_pin, 
-                             config.__altitude_range,
-                             config.__altitude_pulse,
-                             config.__altitude_reverse)
+                             config._altitude_pin,
+                             config._altitude_range,
+                             config._altitude_pulse,
+                             config._altitude_reverse)
             motion.add_servo('azimuth', 
-                             config.__azimuth_pin, 
-                             config.__azimuth_range,
-                             config.__azimuth_pulse,
-                             config.__azimuth_reverse)
+                             config._azimuth_pin,
+                             config._azimuth_range,
+                             config._azimuth_pulse,
+                             config._azimuth_reverse)
             motion.add_actuator('trigger',
-                                config.__trigger_pin,
-                                config.__trigger_type)
+                                config._trigger_pin,
+                                config._trigger_type)
             motion.add_actuator('safety',
-                                config.__safety_pin,
-                                config.__safety_type)
+                                config._safety_pin,
+                                config._safety_type)
             #Create threads
             camera_queue = queue.Queue()
             control_queue = queue.Queue()
@@ -114,7 +130,7 @@ def connect_and_run():
                                                     camera_queue, 
                                                     control_queue,
                                                     stop_flag)
-            server_thread = piserver.Server_Process(data_socket, 
+            server_thread = piserver.Server_Process(data_client,
                                                     server_queue, 
                                                     control_queue,
                                                     stop_flag)
@@ -139,21 +155,22 @@ def connect_and_run():
             while True:
                 alive = [i.is_alive() for i in threads]
                 if not all(alive):
+                    print('dying')
                     stop_flag.set()
                     break
             
     except:
         try:
             data_socket.close()
-        except UnboundLocalError:
+        except (UnboundLocalError, AttributeError):
             pass
         try:
             data_client.close()
-        except UnboundLocalError:
+        except (UnboundLocalError, AttributeError):
             pass
         try:
             camera_socket.close()
-        except UnboundLocalError:
+        except (UnboundLocalError, AttributeError):
             pass
         raise
         
@@ -168,6 +185,14 @@ def handle_options():
                                         'help',
                                         'static-config',
                                         'used-pins'])
+    #Set defaults
+    config.camera_on = True
+    config.motion_on = True
+    config.echo = False
+    if ('-e', '') in options or ('--echo', '') in options:
+        config.echo = True
+    else:
+        config.echo = False
     for opt, arg in options:
         #Display help file
         if opt in ['-h', '--help', '-?']:
@@ -176,7 +201,6 @@ def handle_options():
             sys.exit()
         #Turn on or off echoing, motion control, and camera control according to
         #options given at command line.
-        config.echo = True if opt in ['-e', '--echo'] else False
         config.motion_on = False if opt in ['-m', '--no-motion'] else True
         config.camera_on = False if opt in ['-c', '--no-camera'] else True
         #Force disable camera if picamera isn't imported and motion if RPIO 
@@ -204,8 +228,9 @@ def main():
     #Connect to a UI and accept its commands
     connect_and_run()
     #Rewrite config
-    if not config.static():
+    if not config.static:
         config.rewrite()
+    print('main thread over')
     
 if __name__ == '__main__':    
     main()

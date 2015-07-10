@@ -3,10 +3,12 @@ Connecting:
 
 Connection has two parts. First, the Raspberry Pi listens on the data socket
 and the UI connects. Then, the UI listens on a camera port and sends a port 
-number while the Raspberry Pi connects. If the Raspberry Pi cannot use the port,
-it will send the byte '00' and the UI will send another port number. At this 
-point, the Raspberry Pi will begin transmitting video and either side can send 
-commands.
+number while the Raspberry Pi connects. If the UI does not want to establish a
+video socket, it will return the port 0x000000 and the Raspberry Pi will
+disable camera function. If the Raspberry Pi cannot use the port, it will send
+the byte '00' and the UI will send another port number. If it can use the port,
+it sends the the byte 'FF' At this point, the Raspberry Pi will begin
+transmitting video and either side can send commands.
 
 
 Commands:
@@ -64,10 +66,14 @@ Hex code    Function
 
 54          Request list of saved locations. Argument is irrelevant.
 
+--Other
+
+E0          Shutting down. Argument is irrelevant.
+
 
 To UI:
 =====================
-Byte code   Function
+Hex code    Function
 ---------------------
 00          Error. Argument is ID of error.
 
@@ -86,3 +92,9 @@ Byte code   Function
 14          Begin list of saved locations. Argument is number of saved          # Going to need special protocol for this.
             locations. Unsigned.
             
+
+Errors:
+=====================
+ID (b10)    Function
+---------------------
+0           Unexpected shutdown of UI

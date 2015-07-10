@@ -118,8 +118,8 @@ class Motion_Controller():
             pin = self.servos[servo]['pin']
             self.servo_channels[self.servos[servo]['servo']].set_servo(pin, pulse)
             if config.echo:
-                print('%s set to %s degrees' % self.servos[servo]['name'],
-                                               self.servos[servo]['position'])
+                print('%s set to %s degrees' % (self.servos[servo]['name'],
+                                               self.servos[servo]['position']))
         for actuator in self.actuators:
             position = 1 if self.actuators[actuator]['position'] == 'in' else 0
             pin = self.actuators[actuator]['pin']
@@ -149,7 +149,7 @@ class Motion_Controller():
         #Invert change if the servo has been set to be reversed.
         change *= -1 if self.servos[servo_name]['reverse'] else 1
         if config.echo:
-            print ('Moving %s %s degrees.' % servo_name, change)
+            print ('Moving %s %s degrees.' % (servo_name, change))
         self.servos[servo_name]['position'] += change
         self.update()
     
@@ -174,7 +174,7 @@ class Motion_Controller():
     #       The name assigned to the servo controllng azimuth (x on camera).
     def move_to_pixel(self, pixel_target, altitude_servo = 'altitude',
                       azimuth_servo = 'azimuth'):
-        resolution = self.camera_controller.resolution
+        resolution = self.camera_controller.camera.resolution
         field_of_view = self.camera_controller.field_of_view
         crosshair_calibration = self.camera_controller.crosshair_calibration
         #Calculate altitude and azimuth change
@@ -230,8 +230,8 @@ class Motion_Controller():
         #Set actuator
         self.actuate(actuator_name, new_position)
         #Create and start return timer
-        timer = threading.Timer(time, self.actuate(actuator_name, 
-                                                   final_position))
+        timer = threading.Timer(time, self.actuate, args=(actuator_name,
+                                                          final_position))
         timer.start()
             
             
@@ -305,7 +305,6 @@ class Dummy_Motion_Controller(Motion_Controller):
             position = 'in'
         elif kind == 'pull':
             position = 'out'
-        RPIO.setup(pin, RPIO.out)
         self.actuators[name] = {'pin': pin,
                                 'kind': kind,
                                 'position': position
@@ -321,20 +320,20 @@ class Dummy_Motion_Controller(Motion_Controller):
             if self.servos[servo]['position'] > self.servos[servo]['range']:
                 self.servos[servo]['position'] = self.servos[servo]['range']
             if config.echo:
-                print('%s set to %s degrees' % self.servos[servo]['name'],
-                                               self.servos[servo]['position'])
+                print('%s set to %s degrees' % (servo,
+                                               self.servos[servo]['position']))
         for actuator in self.actuators:
             position = 1 if self.actuators[actuator]['position'] == 'in' else 0
             pin = self.actuators[actuator]['pin']
             if self.actuators[actuator]['kind'] == 'push':
                 if config.echo:
                     if position == 0:
-                        print('%s triggered' % self.actuators[actuator]['name'])
+                        print('%s triggered' % actuator)
                     else:
-                        print('%s loose' % self.actuators[actuator]['name'])
+                        print('%s loose' % actuator)
             else:
                 if config.echo:
                     if position == 1:
-                        print('%s triggered' % self.actuators[actuator]['name'])
+                        print('%s triggered' % actuator)
                     else:
-                        print('%s loose' % self.actuators[actuator]['name'])
+                        print('%s loose' % actuator)

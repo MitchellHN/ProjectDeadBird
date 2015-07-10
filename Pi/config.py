@@ -1,8 +1,8 @@
 #/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import tempfile
 import os
+import threading
 
 #============================================================================
 # Config
@@ -12,7 +12,7 @@ import os
 #   a few rules that must be followed to ensure that the file is correctly
 #   updated:
 #       *All variables that are stored from session to session must have names
-#        beginnging with "__".
+#        beginnging with "_".
 #       *The variable names and the equals sign must finish before column 25.
 #       *Variable values must begin on or after column 25.
 #       *Lists and dictionaries may be split across multiple lines, as normal.
@@ -35,31 +35,31 @@ import os
 #   first line of a dictionary or list, or both.
 
 #SSL
-__cert_file =           'cert.pem'                  #certificate file
-__key_file =            'key.pem'                   #certificate key file
+_cert_file =           'cert.pem'                  #certificate file
+_key_file =            'key.pem'                   #certificate key file
 
 #IO
-__altitude_pin =        1                           #pin to altitude servo
-__altitude_range =      90                          #alt motion range (degrees)
-__altitude_pulse =      [1.0,                       #alt pulse range (mS)
+_altitude_pin =        1                           #pin to altitude servo
+_altitude_range =      90                          #alt motion range (degrees)
+_altitude_pulse =      [1.0,                       #alt pulse range (mS)
                          2.0]
-__altitude_reverse =    False                       #if up = 0 degrees
-__azimuth_pin =         2                           #pin to azimuth servo
-__azimuth_range =       90                          #az motion range (degrees)
-__azimuth_pulse =       [1.0,                       #az pulse range (mS)
+_altitude_reverse =    False                       #if up = 0 degrees
+_azimuth_pin =         2                           #pin to azimuth servo
+_azimuth_range =       90                          #az motion range (degrees)
+_azimuth_pulse =       [1.0,                       #az pulse range (mS)
                          2.0]
-__azimuth_reverse =     False                       #if +degrees = ccwise
-__trigger_pin =         3                           #pin to trigger actuator
-__trigger_type =        'pull'                      #type of trigger actuator
-__safety_pin =          4                           #pin to safety actuator
-__safety_type =         'pull'                      #type of safety actuator
-__safety_on_position =  'out'                       #'in' or 'out'
-__fire_position =       'in'
-__fire_duration =       0.5                         #duration of trigger pull
+_azimuth_reverse =     False                       #if +degrees = ccwise
+_trigger_pin =         3                           #pin to trigger actuator
+_trigger_type =        'pull'                      #type of trigger actuator
+_safety_pin =          4                           #pin to safety actuator
+_safety_type =         'pull'                      #type of safety actuator
+_safety_on_position =  'out'                       #'in' or 'out'
+_fire_position =       'in'
+_fire_duration =       0.5                         #duration of trigger pull
 
 #Camera
-__calibration =         [320, 230]                  #where on screen bbs hit
-__fov =                 [53.5, 41.41]               #degrees [x, y]
+_calibration =         [320, 230]                  #where on screen bbs hit
+_fov =                 [53.5, 41.41]               #degrees [x, y]
 
 #Unaltered by program
 used_pins =             []                          #E.g. by other processes
@@ -86,7 +86,7 @@ def rewrite():
             if '###' in line:
                 break
             #Get name of variable
-            if line[0:2] == '__':
+            if line[0:2] == '_':
                 last_var = line.split()[0]
             comment = ''
             #Find only in-line comments
@@ -104,7 +104,7 @@ def rewrite():
         configfile.seek(0)
         for line in configfile:
             #Variable lines
-            if line[0:2] == '__':
+            if line[0:2] == '_':
                 #Convert variable value into string
                 variable = line.split()[0]
                 #Get comment

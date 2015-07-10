@@ -34,9 +34,9 @@ class Camera_Controller():
         self.camera = picamera.PiCamera()
         self.camera.resolution = [640, 480]
         self.camera.framerate = 24
-        self.field_of_view = config.__fov
+        self.field_of_view = config._fov
         self.connection = server_socket.makefile('wb')
-        self.crosshair_calibration = config.__calibration
+        self.crosshair_calibration = config._calibration
         
     def begin_transmission(self):
         if config.echo:
