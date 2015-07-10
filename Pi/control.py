@@ -118,14 +118,19 @@ class Control_Process(threading.Thread):
             position = 'in'
         if config.echo:
             print('Safety actuator set to ' + position + '.')
+        config.safety = on_off
         self.motion_controller.actuate('safety', position)
 
     def fire(self):
-        if config.echo:
-            print('Firing.')
-        self.motion_controller.pulse_actuator('trigger',
-                                              config._fire_duration,
-                                              config._fire_position)
+        if config.safety == 'off'
+            if config.echo:
+                print('Firing.')
+            self.motion_controller.pulse_actuator('trigger',
+                                                  config._fire_duration,
+                                                  config._fire_position)
+        else:
+            if config.echo:
+                print('Cannot fire; safety is on.')
 
     def move_reticle(self, pixel):
         x, y = self.pixel_to_coordinates(pixel)

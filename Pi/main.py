@@ -120,6 +120,8 @@ def connect_and_run():
             motion.add_actuator('safety',
                                 config._safety_pin,
                                 config._safety_type)
+            config.safety = 'on'
+            motion.actuate('safety', config.safety_on_position)
             #Create threads
             camera_queue = queue.Queue()
             control_queue = queue.Queue()
