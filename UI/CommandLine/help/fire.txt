@@ -1,0 +1,3 @@
+help:fire
+Sends a command to the Rasperry Pi to pull the trigger.
+Usage: "fire"

@@ -1,0 +1,3 @@
+help:store location
+Sends a command to the Raspberry Pi to store the current altitude and azimuth as a saved location.
+Usage: "store location"

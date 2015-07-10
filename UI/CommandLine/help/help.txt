@@ -1,0 +1,14 @@
+help:help
+Enter "help:<command>" for more information on a command.
+    quit
+    error
+    move
+    set safety
+    fire
+    move reticle
+    store location
+    get reticle
+    get altitude
+    get azimuth
+    get safety
+    get locations

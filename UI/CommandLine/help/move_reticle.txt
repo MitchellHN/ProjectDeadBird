@@ -1,0 +1,4 @@
+help:move reticle
+Sends a command to the Raspberry Pi to move the reticle to a particular pixel.
+Usage: "move reticle:<arg>"
+    Arg is the pixel number, starting at zero in the top left corner and moving right and then down.

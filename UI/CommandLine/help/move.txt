@@ -1,0 +1,18 @@
+help:move
+Sends a command to the Raspberry Pi to move the aim servos.
+Usage: "move:<type>,<arg>(,<arg>)"
+Types:
+    altitude
+    azimuth
+        Accept two args. First is "+" (increase), "-" (decrease), or "=" (set equal). Second is
+        the value in 1/100 degrees. Second arg must be a positive integer
+    pixel
+        Accepts one arg, the pixel number, starting at zero in the top left corner and moving
+        right and then down.
+    location
+        Accepts one arg, the location id.
+Examples:
+    move:azimuth,+,100      Moves the azimuth 1 degree clockwise.
+    move:altitude,=,1500    Moves to an altitude of 15 degrees.
+    move:pixel,0            Moves to the pixel in the top left corner.
+    move:location,10        Moves to the location stored with ID 10.

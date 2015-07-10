@@ -1,0 +1,6 @@
+help:error
+Sends an error message to the Raspberry Pi.
+Usage: "error:<code>"
+Examples:
+    error:0                 Tells the Raspberry Pi that the UI has unexpectedly shut down.
+See ssl_protocol.txt in the project home folder for information on all error codes

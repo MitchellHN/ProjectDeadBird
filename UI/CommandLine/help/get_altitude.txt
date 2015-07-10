@@ -1,0 +1,3 @@
+help:get altitude
+Sends a command to the Rapsberry Pi to return the current altitude.
+Usage: "get altitude"

@@ -1,0 +1,6 @@
+cmd: set safety?
+Sends a command to the Raspberry Pi to set the safety on or off.
+Usage: "set safety:<arg>".
+    Arg is either "on" or "off"
+Example:
+    set safety:on           Sets the safety on.
