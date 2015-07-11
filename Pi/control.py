@@ -135,7 +135,7 @@ class Control_Process(threading.Thread):
     def move_reticle(self, pixel):
         x, y = self.pixel_to_coordinates(pixel)
         if config.echo:
-            print('Moving reticle to %s by %s.' % x, y)
+            print('Moving reticle to %s by %s.' % (x, y))
         self.camera_queue.put(['move reticle', x, y])
 
     def store_location(self):
