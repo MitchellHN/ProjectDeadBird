@@ -171,8 +171,8 @@ def kill(threads, stop, fail):
 
 
 def main():
-        sock = connect()
-        fail = threading.Event()
+    sock = connect()
+    fail = threading.Event()
     try:
         print('connected')
         sock.settimeout(0.250)

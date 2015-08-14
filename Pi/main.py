@@ -17,17 +17,17 @@
 #                               semicolons.
 #       -h, -?, --help          Displays help file.
 
-import Server.piserver as piserver
-import Hardware.camera_controller as camera_controller
-import Hardware.motion_controller as motion_controller
-import control
+from .Server import piserver
+from .Hardware import camera_controller
+from .Hardware import motion_controller
+from . import control
 import socket
 import ssl
 import queue
 import multiprocessing
 import threading
 import getopt
-import config
+from . import config
 import sys
 
 #Connects to a UI and executes commands received from it. 

@@ -3,7 +3,7 @@
 
 import socket
 import ssl
-import config
+from .. import config
 try:
     import picamera
 except (ImportError, SystemError):

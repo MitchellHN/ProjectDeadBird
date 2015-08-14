@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import Hardware.camera_controller as camera_controller
-import config
+from . import camera_controller
+from .. import config
 import time
 import threading
 try:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import multiprocessing
-import config
+from . import config
 import math
 import threading
 
@@ -122,7 +122,7 @@ class Control_Process(threading.Thread):
         self.motion_controller.actuate('safety', position)
 
     def fire(self):
-        if config.safety == 'off'
+        if config.safety == 'off':
             if config.echo:
                 print('Firing.')
             self.motion_controller.pulse_actuator('trigger',

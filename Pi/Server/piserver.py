@@ -12,7 +12,7 @@ import ssl
 import multiprocessing
 import threading
 import queue
-import config
+from .. import config
 
 # Used to pipe the video feed to the UI
 class Camera_Process(threading.Thread):
